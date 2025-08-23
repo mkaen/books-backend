@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import Integer, String, Date, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, Relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.database import db
 
@@ -18,9 +18,9 @@ class Book(db.Model):
     lent_out: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     owner_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("users.id"), nullable=False)
-    book_owner = Relationship('User', foreign_keys=[owner_id], back_populates='my_books')
     lender_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("users.id"), nullable=True)
-    book_lender = Relationship('User', foreign_keys=[lender_id], back_populates='reserved_books')
+    book_owner = relationship('User', foreign_keys=[owner_id], back_populates='my_books')
+    book_lender = relationship('User', foreign_keys=[lender_id], back_populates='reserved_books')
 
     def to_dict(self):
         result = {

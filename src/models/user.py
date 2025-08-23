@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import Mapped, mapped_column, Relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from constants import DEFAULT_LEND_DURATION
 
 from models.database import db
@@ -14,8 +14,8 @@ class User(UserMixin, db.Model):
     email: Mapped[String] = mapped_column(String(250), nullable=False, unique=True)
     password: Mapped[String] = mapped_column(String(250), nullable=False)
     duration: Mapped[int] = mapped_column(Integer, nullable=False, default=DEFAULT_LEND_DURATION)
-    my_books = Relationship('Book', foreign_keys='Book.owner_id', back_populates='book_owner')
-    reserved_books = Relationship('Book', foreign_keys='Book.lender_id', back_populates='book_lender')
+    my_books = relationship("Book", back_populates="book_owner", foreign_keys="[Book.owner_id]")
+    reserved_books = relationship("Book", back_populates="book_lender", foreign_keys="[Book.lender_id]")
 
     def get_user_dict(self):
         return {
