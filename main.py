@@ -2,9 +2,9 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 import logging
-from models.database import db
+from src.models.database import db
 from src.api.controller import user_blueprint, book_blueprint
-from utilities.auth import login_manager
+from src.utilities.auth import login_manager
 from logger.logger_config import logger, logger_handler, formatter
 
 load_dotenv()
@@ -47,4 +47,4 @@ def create_app(config_class=None):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5001)

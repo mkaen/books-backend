@@ -4,13 +4,13 @@ from flask import request, jsonify
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from constants import MIN_LEND_DURATION, MAX_LEND_DURATION
-from models import user
-from models.database import db
-from models.user import User
-from models.book import Book
-from auth.routes import user_blueprint, book_blueprint
-from utilities.service import validate_image_url
+from src.constants import MIN_LEND_DURATION, MAX_LEND_DURATION
+from src.models import user
+from src.models.database import db
+from src.models.user import User
+from src.models.book import Book
+from src.auth.routes import user_blueprint, book_blueprint
+from src.utilities.service import validate_image_url
 from logger.logger_config import logger
 
 
