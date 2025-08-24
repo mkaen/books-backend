@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import Integer, String, Date, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.database import db
+from src.db.database import db
 
 
 class Book(db.Model):
@@ -34,7 +34,8 @@ class Book(db.Model):
             'isActive': self.active,
             'ownerId': self.owner_id,
             'lenderId': self.lender_id,
-            'returnDate': self.return_date
+            'returnDate': self.return_date,
+            'overdue': False
         }
 
         if self.return_date and self.return_date < date.today():

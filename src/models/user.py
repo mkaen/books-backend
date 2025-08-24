@@ -3,7 +3,7 @@ from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.constants import DEFAULT_LEND_DURATION
 
-from src.models.database import db
+from src.db.database import db
 
 
 class User(UserMixin, db.Model):

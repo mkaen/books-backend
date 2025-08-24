@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from src.constants import MIN_LEND_DURATION, MAX_LEND_DURATION
 from src.models import user
-from src.models.database import db
+from src.db.database import db
 from src.models.user import User
 from src.models.book import Book
 from src.auth.routes import user_blueprint, book_blueprint
@@ -27,10 +27,13 @@ def change_duration(user_id):
     data = request.json
     duration = int(data.get('duration'))
     user = db.get_or_404(User, user_id)
+    previous_duration = user.duration
     if not duration or not MIN_LEND_DURATION <= duration <= MAX_LEND_DURATION:
         return jsonify({"message": f"Wrong duration format or value: {duration}"}), 400
     user.duration = duration
     db.session.commit()
+    logger.info(f"User id: {user_id} changed successfully his lending"
+                f" period from {previous_duration} days to {duration} days")
     return jsonify({"message": f"Successfully changed user id: {user_id} book lending duration to {duration}"}), 200
 
 
@@ -53,6 +56,7 @@ def return_book(book_id):
     book.lender_id = None
     book.lent_out = False
     db.session.commit()
+    logger.info(f"User id: {current_user.id} returned book {book.title} (id: {book.id}) successfully to it's owner")
     return jsonify({"message": f"Book id {book_id} returned successfully"}), 200
 
 
@@ -92,6 +96,7 @@ def reserve_book(book_id):
             "id": book.id,
             "lenderId": current_user.id
         }
+        logger.info(f"Current user id: {current_user.id} reserved book id: {book.id} successfully")
         return jsonify({"message": f"Book id: {book_id} reserved successfully to lender id: {current_user.id}",
                         "data": response_data}), 200
     logger.info(f"Failed to reserve book {book_id}")
@@ -128,9 +133,9 @@ def receive_book(book_id):
     message = f"Book id {book_id} received successfully"
     if not book.lent_out:
         if current_user in (book.book_owner, book.book_lender):
-            user = db.get_or_404(User, current_user.id)
             current_date = datetime.now().date()
-            return_date = current_date + timedelta(days=user.duration)
+            book_owner = db.get_or_404(User, book.owner_id)
+            return_date = current_date + timedelta(days=book_owner.duration)
             book.return_date = return_date
             book.lent_out = True
             db.session.commit()

@@ -2,10 +2,10 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 import logging
-from src.models.database import db
+from src.db.database import db
 from src.api.controller import user_blueprint, book_blueprint
 from src.utilities.auth import login_manager
-from logger.logger_config import logger, logger_handler, formatter
+from logger.logger_config import logger, file_handler, formatter
 
 load_dotenv()
 
@@ -20,11 +20,11 @@ def create_app(config_class=None):
 
     if config_class:
         app.config.from_object(config_class)
-        logger.logger_handler = logging.FileHandler(LOGGER_TEST, mode="w")
+        logger.file_handler = logging.FileHandler(LOGGER_TEST, mode="w")
         logger.setLevel(logging.DEBUG)
 
-    logger_handler.setFormatter(formatter)
-    logger.addHandler(logger_handler)
+    file_handler.setFormatter(logging.Formatter(formatter))
+    logger.addHandler(file_handler)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
