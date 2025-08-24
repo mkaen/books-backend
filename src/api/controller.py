@@ -130,12 +130,12 @@ def receive_book(book_id):
         if current_user in (book.book_owner, book.book_lender):
             user = db.get_or_404(User, current_user.id)
             current_date = datetime.now().date()
-            new_date = current_date + timedelta(days=user.duration)
-            book.return_date = new_date
+            return_date = current_date + timedelta(days=user.duration)
+            book.return_date = return_date
             book.lent_out = True
             db.session.commit()
             logger.info(message)
-            return jsonify({"message": message})
+            return jsonify({"message": message, "returnDate": return_date.strftime("%d-%m-%Y")})
         message = f"Unauthorized to receive book id {book_id}"
         logger.info(message)
         return jsonify({"message": message}), 401
