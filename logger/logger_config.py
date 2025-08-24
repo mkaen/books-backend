@@ -10,7 +10,6 @@ LOGGER_LOCATION = os.environ.get("LOGGER_LOCATION", "logs/app.log")
 logger = logging.getLogger("books-backend")
 logger.setLevel(logging.INFO)
 
-file_handler = ""
 formatter = f"[{get_current_time()}] - %(name)s - %(levelname)s - %(message)s"
 
 if not logger.handlers:

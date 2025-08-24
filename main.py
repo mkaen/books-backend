@@ -23,9 +23,6 @@ def create_app(config_class=None):
         logger.file_handler = logging.FileHandler(LOGGER_TEST, mode="w")
         logger.setLevel(logging.DEBUG)
 
-    file_handler.setFormatter(logging.Formatter(formatter))
-    logger.addHandler(file_handler)
-
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = SECRET_KEY

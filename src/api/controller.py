@@ -210,7 +210,6 @@ def add_book():
 def get_current_user():
     if current_user.is_authenticated:
         return jsonify(user.User.get_user_dict(current_user)), 200
-    logger.info(f"Current user is unauthorized user")
     return jsonify({"authenticated": False}), 401
 
 
