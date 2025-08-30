@@ -5,7 +5,7 @@ import logging
 from src.db.database import db
 from src.api.controller import user_blueprint, book_blueprint
 from src.utilities.auth import login_manager
-from logger.logger_config import logger, file_handler, formatter
+from logger.logger_config import logger
 
 load_dotenv()
 
@@ -27,7 +27,9 @@ def create_app(config_class=None):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = SECRET_KEY
     app.config.update({
-        'SESSION_COOKIE_NAME': 'session_id'
+        'SESSION_COOKIE_NAME': 'session_id',
+        'SESSION_COOKIE_SAMESITE': "None",
+        'SESSION_COOKIE_SECURE': False
     })
 
     db.init_app(app)
