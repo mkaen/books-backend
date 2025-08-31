@@ -174,7 +174,6 @@ def remove_book(book_id):
 def add_book():
     """Create and add a new book to the database and lending environment."""
     data = request.json
-    user_id = data.get("userId")
     title = data.get('title').title()
     author = data.get('author').title()
     image_url = data.get('imageUrl')
@@ -197,7 +196,7 @@ def add_book():
                     return_date=None,
                     reserved=False,
                     lent_out=False,
-                    owner_id=user_id,
+                    owner_id=current_user.id,
                     active=True,
                     description=description)
     db.session.add(new_book)
