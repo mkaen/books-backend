@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 from logger.utils import formatter, console_formatter
 
 load_dotenv()
+
 LOGGER_LOCATION = os.environ.get("LOGGER_LOCATION", "logs/app.log")
+os.makedirs(os.path.dirname(LOGGER_LOCATION), exist_ok=True)
 
 logger = logging.getLogger("books-backend")
 logger.setLevel(logging.INFO)

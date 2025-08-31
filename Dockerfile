@@ -12,7 +12,7 @@ RUN mkdir -p /books-be/logs
 
 EXPOSE 5001
 
-ENV PYTHONPATH=/books-be:/books-be/src
-ENV FLASK_ENV=production
+ENV PYTHONPATH=/books-be/src
+ENV FLASK_ENV=development
 
 CMD [ "python", "main.py" ]
