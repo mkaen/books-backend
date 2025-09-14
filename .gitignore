@@ -27,3 +27,4 @@ htmlcov/
 *.iws
 *.ipr
 out/
+instance

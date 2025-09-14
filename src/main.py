@@ -2,9 +2,9 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 import logging
-from src.db.database import db
-from src.api.controller import user_blueprint, book_blueprint
-from src.utilities.auth import login_manager
+from db.database import db
+from api.controller import user_blueprint, book_blueprint
+from utilities.auth import login_manager
 from logger.logger_config import logger
 
 load_dotenv()
