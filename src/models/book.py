@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import Integer, String, Date, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.db.database import db
+from db.database import db
 
 
 class Book(db.Model):
