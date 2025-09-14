@@ -1,9 +1,9 @@
 from flask_login import UserMixin
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.constants import DEFAULT_LEND_DURATION
+from constants import DEFAULT_LEND_DURATION
 
-from src.db.database import db
+from db.database import db
 
 
 class User(UserMixin, db.Model):
