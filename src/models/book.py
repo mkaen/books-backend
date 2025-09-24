@@ -11,7 +11,7 @@ class Book(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[String] = mapped_column(String(250), nullable=False, unique=True)
     author: Mapped[String] = mapped_column(String(250), nullable=False)
-    description: Mapped[String] = mapped_column(String(4000))
+    description: Mapped[String] = mapped_column(String(4000), nullable=True)
     image_url: Mapped[String] = mapped_column(String(250), nullable=False)
     return_date: Mapped[date] = mapped_column(Date, nullable=True, default=None)
     reserved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

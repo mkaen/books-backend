@@ -18,11 +18,6 @@ def create_app(config_class=None):
     """Create and configure Flask application."""
     app = Flask(__name__)
 
-    if config_class:
-        app.config.from_object(config_class)
-        logger.file_handler = logging.FileHandler(LOGGER_TEST, mode="w")
-        logger.setLevel(logging.DEBUG)
-
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = SECRET_KEY
@@ -30,6 +25,11 @@ def create_app(config_class=None):
     app.config['SESSION_COOKIE_NAME'] = 'session_id'
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_SECURE'] = False
+
+    if config_class:
+        app.config.from_object(config_class)
+        logger.file_handler = logging.FileHandler(LOGGER_TEST, mode="w")
+        logger.setLevel(logging.DEBUG)
 
     db.init_app(app)
     login_manager.init_app(app)
