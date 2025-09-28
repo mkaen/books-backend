@@ -25,9 +25,17 @@ def get_all_the_books():
 @login_required
 def change_duration(user_id):
     data = request.json
-    duration = int(data.get('duration'))
+    duration = data.get('duration')
     user = db.get_or_404(User, user_id)
     previous_duration = user.duration
+
+    if current_user.id != user_id:
+        return jsonify({"msg": f"Current user id:{current_user.id} cannot change user id: {user_id} duration"}), 401
+    try:
+        duration = int(duration)
+    except (ValueError, TypeError):
+        return jsonify({"msg": f"Wrong duration format: {duration}"}), 400
+
     if not duration or not MIN_LEND_DURATION <= duration <= MAX_LEND_DURATION:
         return jsonify({"message": f"Wrong duration format or value: {duration}"}), 400
     user.duration = duration
@@ -65,13 +73,16 @@ def return_book(book_id):
 def book_activity_toggle(book_id):
     """Activate or deactivate your own book for lending out."""
     book = db.get_or_404(Book, book_id)
-    if book and book.owner_id == current_user.id and book.lent_out is False:
+    if book.owner_id != current_user.id:
+        return jsonify({"msg": f"Current user id: {current_user.id} cannot change book id {book.id} activity toggle."
+                               f"Book owner id: {book.owner_id}"}), 401
+    if not book.lent_out:
         book.active = not book.active
         db.session.commit()
         logger.info(f"(Book id: {book.id}) activity set to {book.active}")
         return jsonify({"message": f"Book availability: {book.active}",
                         "data": book.active}), 200
-    return jsonify(success=False, error="You are not authorized to do that action."), 401
+    return jsonify(success=False, error="Unable to switch book activity toggle."), 400
 
 
 @book_blueprint.route('/reserve_book/<int:book_id>', methods=['PATCH'])
@@ -109,6 +120,10 @@ def cancel_reservation(book_id):
     """Validate that current user is book lender or book owner and cancel the reservation."""
     book = db.get_or_404(Book, book_id)
     message = f"Failed to cancel book id {book_id} reservation"
+    if not book.reserved:
+        message = f"Cannot cancel reservation Book id: {book_id} Book wasn't reserved"
+        logger.error(message)
+        return jsonify({"msg": message}), 400
     if book.reserved and (book.owner_id == current_user.id or book.book_lender.id == current_user.id):
         book.reserved = False
         book.book_lender = None
@@ -116,8 +131,8 @@ def cancel_reservation(book_id):
         message = f"Successfully cancelled book id {book_id} reservation"
         logger.info(message)
         return jsonify({"message": message}), 200
-    logger.info(message)
-    return jsonify({"message": message}), 400
+    logger.error(message)
+    return jsonify({"message": message}), 401
 
 
 @book_blueprint.route('/receive_book/<int:book_id>', methods=['PATCH'])
@@ -140,13 +155,13 @@ def receive_book(book_id):
             book.lent_out = True
             db.session.commit()
             logger.info(message)
-            return jsonify({"message": message, "returnDate": return_date.strftime("%d-%m-%Y")})
+            return jsonify({"message": message, "returnDate": return_date.strftime("%d-%m-%Y")}), 202
         message = f"Unauthorized to receive book id {book_id}"
         logger.info(message)
         return jsonify({"message": message}), 401
     message = f"Book id {book_id} is already lent out"
     logger.info(message)
-    return jsonify({"message": message})
+    return jsonify({"message": message}), 400
 
 
 @book_blueprint.route('/remove_book/<int:book_id>', methods=['DELETE'])
@@ -178,6 +193,9 @@ def add_book():
     author = data.get('author').title()
     image_url = data.get('imageUrl')
     description = data.get('description')
+
+    if len(author) < 4:
+        return jsonify({"msg": f"author value: {author} is too short."}), 400
 
     if not validate_image_url(image_url):
         return jsonify({"msg": f"Book {title} image URL is invalid"}), 409

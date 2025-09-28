@@ -3,4 +3,5 @@ class TestConfig:
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     LOGIN_DISABLED = False
-    SESSION_PROTECTION = None
+    WTF_CSRF_ENABLED = False
+    SECRET_KEY = "test-secret-key-test"
