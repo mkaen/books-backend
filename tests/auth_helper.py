@@ -1,8 +1,10 @@
 from test_constants import UserEndpoints
+
+
 def login(client, email, password='123456'):
     """Log in the user."""
     try:
-        response = client.post(f'{UserEndpoints.LOGIN}', json={
+        response = client.post(UserEndpoints.LOGIN, json={
             'email': email,
             'password': password
         })
@@ -13,5 +15,5 @@ def login(client, email, password='123456'):
 
 def logout(client):
     """Log out the user."""
-    response = client.post(f'{UserEndpoints.LOGOUT}')
+    response = client.post(UserEndpoints.LOGOUT)
     return response

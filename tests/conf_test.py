@@ -80,7 +80,7 @@ def second_user_with_books(client):
 
 
 @pytest.fixture
-def add_third_user(client):
+def third_user_with_books(client):
     with app.app_context():
         new_user = User(
             first_name='Toomas',

@@ -8,7 +8,7 @@ from test_constants import UserEndpoints, TestUserEmail
 
 
 def test_register_new_user(client):
-    response = client.post(f'{UserEndpoints.REGISTER}', json={
+    response = client.post(UserEndpoints.REGISTER, json={
         'firstName': 'Priit',
         'lastName': 'pätt',
         'email': 'priit.patt@gmail.com',
@@ -27,7 +27,7 @@ def test_register_new_user(client):
 
 
 def test_register_email_already_exists(client, first_user_with_books):
-    response = client.post(f'{UserEndpoints.REGISTER}', json={
+    response = client.post(UserEndpoints.REGISTER, json={
         'firstName': 'Juhan',
         'lastName': 'Viik',
         'email': 'juhan.viik@gmail.com',
@@ -39,7 +39,7 @@ def test_register_email_already_exists(client, first_user_with_books):
 
 
 def test_login_user(client, first_user_with_books):
-    response = client.post(f'{UserEndpoints.LOGIN}', json={
+    response = client.post(UserEndpoints.LOGIN, json={
         'email': TestUserEmail.JUHAN,
         'password': '123456'
     })
@@ -49,18 +49,18 @@ def test_login_user(client, first_user_with_books):
     assert response.status_code == 202
 
 
-# def test_invalid_username_login(client, first_user_with_books):
-#     response = client.post('/login', data={
-#         'username': 'juhanvi',
-#         'password': '123456'
-#     }, follow_redirects=True)
-#     assert response.status_code == 200
-#     assert b"Invalid Username. Please try again" in response.data
-#     assert response.request.path == '/login'
+def test_invalid_email_login(client, first_user_with_books):
+    response = client.post(UserEndpoints.LOGIN, json={
+        'email': 'juhani.viik@gmail.com',
+        'password': '123456'
+    })
+    assert response.status_code == 401
+    with client.session_transaction() as session:
+        assert '_user_id' not in session
 
 
 def test_invalid_password_login(client, first_user_with_books):
-    response = client.post(f'{UserEndpoints.LOGIN}', json={
+    response = client.post(UserEndpoints.LOGIN, json={
         'email': TestUserEmail.JUHAN,
         'password': '1234567'
     })
@@ -68,18 +68,18 @@ def test_invalid_password_login(client, first_user_with_books):
 
 
 def test_logout_user(client, first_user_with_books):
-    login_response = client.post(f'{UserEndpoints.LOGIN}', json={
+    login_response = client.post(UserEndpoints.LOGIN, json={
         'email': TestUserEmail.JUHAN,
         'password': '123456'
     })
     assert login_response.status_code == 202
     assert current_user.is_active
-    client.post(f'{UserEndpoints.LOGOUT}')
+    client.post(UserEndpoints.LOGOUT)
     assert not current_user.is_authenticated
     with client.session_transaction() as session:
-        assert 'session_id' not in session
+        assert '_user_id' not in session
 
 
 def test_logout_user_not_in_session(client):
-    response = client.get(f'{UserEndpoints.LOGOUT}')
+    response = client.get(UserEndpoints.LOGOUT)
     assert response.status_code == 405
