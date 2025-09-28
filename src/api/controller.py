@@ -21,6 +21,16 @@ def get_all_the_books():
     return jsonify(book_list), 200
 
 
+@book_blueprint.route('/user_books/<int:user_id>')
+@login_required
+def get_user_books(user_id):
+    if current_user.id != user_id:
+        return jsonify({"msg": f"User id: {current_user.id} is not authorized to fetch user id: {user_id} books"}), 401
+    books = db.session.execute(db.select(Book).where(Book.owner_id == user_id)).scalars()
+    book_list = [book.to_dict() for book in books]
+    return jsonify(book_list), 200
+
+
 @user_blueprint.route('/change_duration/<int:user_id>', methods=['PATCH'])
 @login_required
 def change_duration(user_id):
