@@ -165,7 +165,7 @@ def receive_book(book_id):
             book.lent_out = True
             db.session.commit()
             logger.info(message)
-            return jsonify({"message": message, "returnDate": return_date.strftime("%d-%m-%Y")}), 202
+            return jsonify({"message": message, "returnDate": return_date.strftime("%d-%m-%Y")}), 200
         message = f"Unauthorized to receive book id {book_id}"
         logger.info(message)
         return jsonify({"message": message}), 401
