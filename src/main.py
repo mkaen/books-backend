@@ -13,10 +13,11 @@ DATABASE = os.environ.get('DATABASE')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 LOGGER_TEST = os.environ.get('LOGGER_TEST')
 
+app = Flask(__name__)
+
 
 def create_app(config_class=None):
     """Create and configure Flask application."""
-    app = Flask(__name__)
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_COOKIE_HTTPONLY'] = True

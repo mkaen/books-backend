@@ -29,12 +29,12 @@ class Book(db.Model):
             'author': self.author,
             'description': self.description,
             'img': self.image_url,
+            'returnDate': self.return_date,
             'reserved': self.reserved,
             'lentOut': self.lent_out,
             'isActive': self.active,
             'ownerId': self.owner_id,
             'lenderId': self.lender_id,
-            'returnDate': self.return_date,
             'overdue': False
         }
 

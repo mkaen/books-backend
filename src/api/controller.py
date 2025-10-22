@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from constants import MIN_LEND_DURATION, MAX_LEND_DURATION
 from models import user
 from db.database import db
+from db.db_utils import fetch_books, fetch_user_books
 from models.user import User
 from models.book import Book
 from auth.routes import user_blueprint, book_blueprint
@@ -16,7 +17,8 @@ from logger.logger_config import logger
 
 @book_blueprint.route('/fetch_books')
 def get_all_the_books():
-    books = Book.query.all()
+    """Fetch all the books (without using ORM)."""
+    books = fetch_books()
     book_list = [book.to_dict() for book in books]
     return jsonify(book_list), 200
 
@@ -24,9 +26,11 @@ def get_all_the_books():
 @book_blueprint.route('/user_books/<int:user_id>')
 @login_required
 def get_user_books(user_id):
+    """Fetch books that belongs to specific user (without using ORM)."""
     if current_user.id != user_id:
         return jsonify({"msg": f"User id: {current_user.id} is not authorized to fetch user id: {user_id} books"}), 401
-    books = db.session.execute(db.select(Book).where(Book.owner_id == user_id)).scalars()
+    # books = db.session.execute(db.select(Book).where(Book.owner_id == user_id)).scalars()  # with ORM
+    books = fetch_user_books(user_id)
     book_list = [book.to_dict() for book in books]
     return jsonify(book_list), 200
 
