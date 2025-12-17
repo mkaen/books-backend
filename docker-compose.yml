@@ -3,11 +3,6 @@ version: '3.8'
 services:
   app:
     build: .
-#    environment:
-#      - DATABASE_URL=postgresql://user:pass@db:5432/mydb
-#      - SECRET_KEY=dev-secret-key-123
-#      - DEBUG=True
-#    # VÕI kasuta .env faili
     env_file:
       - .env.dev
     ports:
