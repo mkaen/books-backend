@@ -10,3 +10,4 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./src:/app/src
+      - ./tests:/app/tests
