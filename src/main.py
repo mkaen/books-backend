@@ -9,9 +9,14 @@ from logger.logger_config import logger
 
 load_dotenv()
 
-DATABASE = os.environ.get('DATABASE')
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+
 SECRET_KEY = os.environ.get('SECRET_KEY')
-LOGGER_TEST = os.environ.get('LOGGER_TEST')
+LOGGER_TEST_LOCATION = os.environ.get('LOGGER_TEST_LOCATION')
 
 
 def create_app(config_class=None):
@@ -26,10 +31,10 @@ def create_app(config_class=None):
 
     if config_class:
         app.config.from_object(config_class)
-        logger.file_handler = logging.FileHandler(LOGGER_TEST, mode="w")
+        logger.file_handler = logging.FileHandler(LOGGER_TEST_LOCATION, mode="w")
         logger.setLevel(logging.DEBUG)
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
         app.config['SECRET_KEY'] = SECRET_KEY
 
     db.init_app(app)
