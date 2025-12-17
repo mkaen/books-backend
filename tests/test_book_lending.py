@@ -127,7 +127,7 @@ def test_receive_book_by_lender(client, first_user_with_books, third_user_with_b
     client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     response = client.patch(f'{BookEndpoints.RECEIVE_BOOK}/1')
     book = db.get_or_404(Book, 1)
-    assert response.status_code == 202
+    assert response.status_code == 200
     assert book.lent_out
     assert book.return_date
 
@@ -138,7 +138,7 @@ def test_receive_book_by_borrower(client, first_user_with_books, third_user_with
     logout(client)
     login(client, TestUserEmail.JUHAN)
     response = client.patch(f'{BookEndpoints.RECEIVE_BOOK}/1')
-    assert response.status_code == 202
+    assert response.status_code == 200
     book = db.get_or_404(Book, 1)
     assert book.lent_out
     assert book.reserved
