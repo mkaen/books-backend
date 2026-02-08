@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 from zoneinfo import ZoneInfo
-from constants import TIMEZONE
+from src.constants import TIMEZONE
 
 
 def format_time(record, datefmt=None):

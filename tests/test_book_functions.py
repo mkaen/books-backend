@@ -1,7 +1,6 @@
-from main import db
-from models.user import User
-from models.book import Book
-from conf_test import client, first_user_with_books, second_user_with_books
+from src.db.dao import db
+from src.models.models import User, Book
+from conftest import client, first_user_with_books, second_user_with_books
 from auth_helper import login, logout
 from test_constants import TestUserEmail, BookEndpoints, UserEndpoints
 from test_utils import reserve_and_receive_book

@@ -1,9 +1,11 @@
-from db.database import db
-from models.user import User
-from models.book import Book
-from conf_test import client, first_user_with_books, second_user_with_books
+from src.db.dao import db
+from src.models.models import User, Book
+from conftest import client, first_user_with_books, second_user_with_books
 from auth_helper import login
 from test_constants import TestUserEmail, BookEndpoints
+
+
+# NEW BOOKS CONTENT
 
 cashflow = {
     'title': "Rich Dad's CASHFLOW Quadrant: Rich Dad's Guide to Financial Freedom",
@@ -44,8 +46,10 @@ def test_add_book(client, first_user_with_books):
     """Test adding a book after login."""
     login(client, TestUserEmail.JUHAN)
     assert Book.query.count() == 2
-    response = client.post(BookEndpoints.ADD_BOOK, json=cashflow)
+    db.session.close()
+    response = client.post(BookEndpoints.ADD_BOOK, json=cashflow)  # FEILIB SEE RIDA
     assert response.status_code == 201
+    db.session.close()
     assert Book.query.count() == 3
     book = db.session.query(Book).filter(Book.title.ilike(cashflow.get('title'))).first()
     assert book is not None

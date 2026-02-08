@@ -3,10 +3,9 @@ import logging
 
 from flask_login import current_user
 
-from main import db
-from models.user import User
-from models.book import Book
-from conf_test import client, first_user_with_books, second_user_with_books, third_user_with_books
+from src.db.dao import db
+from src.models.models import User, Book
+from conftest import client, first_user_with_books, second_user_with_books, third_user_with_books
 from auth_helper import login, logout
 from test_constants import TestUserEmail, BookEndpoints
 from test_utils import reserve_and_receive_book
@@ -111,7 +110,7 @@ def test_cancel_reservation_own_book_not_reserved(client, first_user_with_books,
         login(client, TestUserEmail.JUHAN)
         response = client.patch(f'{BookEndpoints.CANCEL_RESERVATION}/1')
         assert response.status_code == 400
-        assert "Cannot cancel reservation Book id: 1 Book wasn't reserved" in caplog.text
+        assert "Book reservation cancellation FAILED, Book id: 1. Book is not reserved" in caplog.text
 
 
 def test_cancel_reservation_book_not_found(client, first_user_with_books):

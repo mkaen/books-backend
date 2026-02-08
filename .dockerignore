@@ -3,4 +3,5 @@
 .dockerignore
 venv
 .env
+.env.*
 instance

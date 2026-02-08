@@ -3,27 +3,30 @@ import pytest
 from auth_helper import logout
 from main import create_app
 from configuration.config import TestConfig
-from db.database import db
-from models.book import Book
-from models.user import User
+from src.db.dao import db
+from src.models.models import Book, User
 from werkzeug.security import generate_password_hash
 
 
-app = create_app(config_class=TestConfig)
+@pytest.fixture
+def app():
+    app = create_app(test_config=TestConfig)
+    return app
 
 
 @pytest.fixture
-def client():
+def client(app):
     with app.app_context():
         db.create_all()
         with app.test_client() as client:
             yield client
             logout(client)
+        db.session.remove()
         db.drop_all()
 
 
 @pytest.fixture
-def first_user_with_books(client):
+def first_user_with_books(client, app):
     with app.app_context():
         new_user = User(
                         first_name='Juhan',
@@ -52,7 +55,7 @@ def first_user_with_books(client):
 
 
 @pytest.fixture
-def second_user_with_books(client):
+def second_user_with_books(client, app):
     with app.app_context():
         new_user = User(first_name='Priit',
                         last_name='pätt',
@@ -80,7 +83,7 @@ def second_user_with_books(client):
 
 
 @pytest.fixture
-def third_user_with_books(client):
+def third_user_with_books(client, app):
     with app.app_context():
         new_user = User(
             first_name='Toomas',
