@@ -18,12 +18,12 @@ setup(
         'Flask-Cors==4.0.0',
         'Flask-SQLAlchemy~=3.1.1',
         'Flask-Login~=0.6.3',
-        'WTForms~=3.1.2',
         'SQLAlchemy~=2.0.35',
         'Werkzeug~=3.0.4',
-        'DateTime~=5.5',
         'python-dotenv~=1.0.1',
         'requests~=2.32.4',
+        'psycopg2-binary~=2.9.9',
+        'alembic~=1.17.2'
     ],
     extras_require={
         'test': [

@@ -1,50 +1,55 @@
 from flask import Flask
-from dotenv import load_dotenv
 import os
 import logging
-from db.database import db
-from api.controller import user_blueprint, book_blueprint
-from utilities.auth import login_manager
-from logger.logger_config import logger
 
-load_dotenv()
+from src.db.dao import init_database
+from src.db.health import check_database
 
-
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set")
+from src.api.controller import user_blueprint, book_blueprint
+from src.utilities.auth import login_manager
+from src.configuration.config import Configuration
+from src.logger.logger_config import logger, configure_logger
 
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
-LOGGER_TEST_LOCATION = os.environ.get('LOGGER_TEST_LOCATION')
-
-
-def create_app(config_class=None):
-    """Create and configure Flask application."""
+def create_app(test_config=None):
+    """Create and start Flask application."""
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_NAME'] = 'session_id'
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    app.config['SESSION_COOKIE_SECURE'] = False
-
-    if config_class:
-        app.config.from_object(config_class)
-        logger.file_handler = logging.FileHandler(LOGGER_TEST_LOCATION, mode="w")
-        logger.setLevel(logging.DEBUG)
+    app.config.from_object(Configuration)
+    configure_logger()
+    if test_config:
+        app.config.from_object(test_config)
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-        app.config['SECRET_KEY'] = SECRET_KEY
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_size': 5,
+            'max_overflow': 10,
+            'pool_pre_ping': True,
+            'pool_recycle': 3600
+        }
 
-    db.init_app(app)
+    # DATABASE
+    init_database(app)
+    # To minimize db connections
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        with app.app_context():
+            check_database()
+
+    # AUTHORIZATION
     login_manager.init_app(app)
 
+    # BLUEPRINTS
     app.register_blueprint(user_blueprint)
     app.register_blueprint(book_blueprint)
 
-    with app.app_context():
-        db.create_all()
+    @app.route('/health')
+    def health():
+        """Check database health."""
+        with app.app_context():
+            db_ok = check_database()
+        return {
+            'status': 'Healthy' if db_ok else 'degraded',
+            'database': 'Connected' if db_ok else 'tables missing'
+        }, 200 if db_ok else 503
 
     return app
 

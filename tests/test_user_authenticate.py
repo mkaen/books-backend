@@ -1,9 +1,9 @@
 from flask_login import current_user
 from werkzeug.security import check_password_hash
 
-from db.database import db
-from models.user import User
-from conf_test import client, first_user_with_books
+from src.db.dao import db
+from src.models.models import User
+from conftest import client, first_user_with_books
 from test_constants import UserEndpoints, TestUserEmail
 
 
