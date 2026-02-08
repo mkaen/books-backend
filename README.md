@@ -9,7 +9,6 @@ Application provides for registered users to upload their books for borrowing to
 ```
 SECRET_KEY="XXXXXXXXXXXXXXXXXXXXXX"
 DATABASE_URL="postgresql://XXXXXXXX@XXXXXXXX:5432/postgres"
-LOGGER_LOCATION="XXXXXXXX"
 ```
 
 ### SETUP LOCALLY & INSTALL DEPENDENCIES
