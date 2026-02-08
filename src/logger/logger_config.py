@@ -1,25 +1,24 @@
 import logging
 import os
 
-from dotenv import load_dotenv
+from src.logger.utils import formatter, console_formatter
+from src.constants import LOGGER_LOCATION
 
-from logger.utils import formatter, console_formatter
+LOGGER_NAME = "books-backend"
 
-load_dotenv()
 
-LOGGER_LOCATION = os.environ.get("LOGGER_LOCATION", "logs/app.log")
-os.makedirs(os.path.dirname(LOGGER_LOCATION), exist_ok=True)
-
-logger = logging.getLogger("books-backend")
+logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.INFO)
 
 
-if not logger.handlers:
-    file_handler = logging.FileHandler(LOGGER_LOCATION)
+def configure_logger():
+    os.makedirs(os.path.dirname(LOGGER_LOCATION), exist_ok=True)
+
+    file_handler = logging.FileHandler(LOGGER_LOCATION, mode="a")
     file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.INFO)
 
     console_handler = logging.StreamHandler()
-    console_formatter = console_formatter
     console_handler.setFormatter(console_formatter)
 
     logger.addHandler(file_handler)

@@ -1,5 +1,5 @@
 import requests
-from logger.logger_config import logger
+from src.logger.logger_config import logger
 
 
 def validate_image_url(url):
@@ -7,7 +7,7 @@ def validate_image_url(url):
     try:
         response = requests.get(url)
         if response.status_code == 200 and 'image' in response.headers['Content-Type']:
-            logger.info(f"Url {url} validation was successful")
+            logger.info(f"Book's cover URL {url} validation was successful")
             return True
         else:
             logger.info(f"Url {url} validation failure")

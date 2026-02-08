@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   app:
     build: .
+    container_name: books-be-app
     env_file:
-      - .env.dev
+      - .env
     ports:
       - "5001:5001"
     volumes:
       - ./logs:/app/logs
-      - ./src:/app/src
-      - ./tests:/app/tests
+    restart: unless-stopped
