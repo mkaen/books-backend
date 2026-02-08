@@ -1,14 +1,19 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
+
+if Path('/app').exists():
+    ROOT = Path('/app')
+else:
+    ROOT = Path(__file__).parent.parent
 
 
 # ENVIRONMENT VARIABLES
 DATABASE_URL = os.getenv('DATABASE_URL')
 SECRET_KEY = os.getenv("SECRET_KEY")
-LOGGER_LOCATION = os.environ.get("LOGGER_LOCATION", "logs/app.log")
-LOGGER_TEST_LOCATION = os.environ.get('LOGGER_TEST_LOCATION')
+LOGGER_LOCATION = str(ROOT / "logs" / "book_lending_be.log")
 
 # USER CONSTANTS
 DEFAULT_LEND_DURATION = 28

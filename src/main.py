@@ -1,6 +1,5 @@
 from flask import Flask
 import os
-import logging
 
 from src.db.dao import init_database
 from src.db.health import check_database
@@ -8,7 +7,7 @@ from src.db.health import check_database
 from src.api.controller import user_blueprint, book_blueprint
 from src.utilities.auth import login_manager
 from src.configuration.config import Configuration
-from src.logger.logger_config import logger, configure_logger
+from src.logger.logger_config import configure_logger
 
 
 def create_app(test_config=None):
