@@ -11,16 +11,13 @@ from src.logger.logger_config import logger
 from src.auth.routes import user_blueprint, book_blueprint
 from src.utilities.service import validate_image_url
 from src.db.helper import send_query_to_database
-from src.constants import MIN_LEND_DURATION, MAX_LEND_DURATION, DEFAULT_LEND_DURATION
+from src.api.service import fetch_all_books, fetch_user_books, fetch_user_reserved_books, handle_duration
+from src.constants import MIN_LEND_DURATION, MAX_LEND_DURATION, DEFAULT_LEND_DURATION, DEFAULT_TIMEZONE
 
 
 @book_blueprint.route('/fetch_books')
 def get_all_the_books():
-    query = text("""
-    SELECT * FROM books ORDER BY created_at DESC
-    """)
-    books = send_query_to_database(query)
-    return jsonify(books)
+    return fetch_all_books()
     # books = Book.query.all()
     # book_list = [book.to_dict() for book in books]
     # return jsonify(book_list), 200
@@ -31,63 +28,23 @@ def get_all_the_books():
 def get_user_books(user_id):
     if current_user.id != user_id:
         return jsonify({"msg": f"User id: {current_user.id} is not authorized to fetch user id: {user_id} books"}), 401
-    query = text("""
-    SELECT * FROM books WHERE owner_id = :p
-    ORDER BY created_at DESC
-    """)
-
-    response = send_query_to_database(query, {'p': user_id})
-
-    if not response:
-        return jsonify([]), 200
-    # books = db.session.execute(db.select(Book).where(Book.owner_id == user_id)).scalars()
-    return jsonify(response), 200
+    return fetch_user_books(user_id)
 
 
 @book_blueprint.route('/reserved_books/<int:user_id>')
 @login_required
 def get_reserved_books_by_user_id(user_id):
-    query = text("""
-    SELECT * FROM books
-    WHERE
-    reserved=TRUE
-    AND
-    lender_id=:p
-    """)
-
-    response = send_query_to_database(query, {'p': user_id})
-    return jsonify(response), 200
+    return fetch_user_reserved_books(user_id)
 
 
 @user_blueprint.route('/change_duration/<int:user_id>', methods=['PATCH'])
 @login_required
 def change_duration(user_id):
-    pass
-    data = request.json
-    duration = data.get('duration')
-    user = db.get_or_404(User, user_id)
-    previous_duration = user.duration
-
     if current_user.id != user_id:
         return jsonify({"msg": f"Current user id:{current_user.id} cannot change user id: {user_id} duration"}), 401
-    try:
-        duration = int(duration)
-    except (ValueError, TypeError):
-        return jsonify({"msg": f"Wrong duration format: {duration}"}), 400
+    data = request.json
+    return handle_duration(user_id, data)
 
-    if not duration or not MIN_LEND_DURATION <= duration <= MAX_LEND_DURATION:
-        return jsonify({"message": f"Wrong duration format or value: {duration}"}), 400
-    query = text("""
-        UPDATE users SET duration = :d
-        WHERE id = :id
-        """)
-
-    send_query_to_database(query, {'d': int(duration), 'id': user_id})
-    # user.duration = duration
-    # db.session.commit()
-    logger.info(f"User id: {user_id} changed successfully his lending"
-                f" period from {previous_duration} days to {duration} days")
-    return jsonify({"message": f"Successfully changed user id: {user_id} book lending duration to {duration}"}), 200
 
 
 @book_blueprint.route('/return_book/<int:book_id>', methods=['PATCH'])
@@ -101,7 +58,6 @@ def return_book(book_id):
     :param book_id: Book id
     :return: redirect to home page.
     """
-    pass
     book = db.get_or_404(Book, book_id)
     if current_user.id not in (book.owner_id, book.lender_id):
         return jsonify({"message": f"Unauthorized to return book id {book_id}"}), 401
@@ -110,10 +66,11 @@ def return_book(book_id):
     return_date = NULL,
     reserved = FALSE,
     lender_id = NULL,
-    lent_out = FALSE
+    lent_out = FALSE,
+    updated_at = timezone(:tz, NOW())
     WHERE id = :id
     """)
-    send_query_to_database(query, {'id': book_id})
+    send_query_to_database(query, {'id': book_id, 'tz': DEFAULT_TIMEZONE})
     # book.return_date = None
     # book.reserved = False
     # book.lender_id = None
@@ -127,15 +84,14 @@ def return_book(book_id):
 @login_required
 def book_activity_toggle(book_id):
     """Activate or deactivate your own book for lending out."""
-    pass
     book = db.get_or_404(Book, book_id)
     if book.owner_id != current_user.id:
         return jsonify({"msg": f"Current user id: {current_user.id} cannot change book id {book.id} activity toggle."
                                f"Book owner id: {book.owner_id}"}), 401
     if not book.lent_out:
-        query = text("""UPDATE books SET active = :activation
+        query = text("""UPDATE books SET active = :activation, updated_at = timezone(:tz, NOW())
         WHERE id = :book_id""")
-        send_query_to_database(query, {'activation': not book.active, 'book_id': book_id})
+        send_query_to_database(query, {'activation': not book.active, 'book_id': book_id, 'tz': DEFAULT_TIMEZONE})
         #     book.active = not book.active
         #     db.session.commit()
         logger.info(f"(Book id: {book.id}) activity set to {book.active}")
@@ -164,13 +120,15 @@ def reserve_book(book_id):
 
     query = text("""UPDATE books SET
          reserved = TRUE,
-         lender_id = :lender_id
+         lender_id = :lender_id,
+         updated_at = timezone(:tz, NOW())
          WHERE id = :book_id
          """)
 
     params = {
         "book_id": book.id,
-        "lender_id": current_user.id
+        "lender_id": current_user.id,
+        "tz": DEFAULT_TIMEZONE
     }
     send_query_to_database(query, params)
     #     book.reserved = True
@@ -194,11 +152,12 @@ def cancel_reservation(book_id):
     if book.reserved and (book.owner_id == current_user.id or book.book_lender.id == current_user.id):
         query = text("""UPDATE books SET
         reserved=FALSE,
-        lender_id=NULL
+        lender_id=NULL,
+        updated_at = timezone(:tz, NOW())
         WHERE 
         id=:id
         """)
-        send_query_to_database(query, {'id': book_id})
+        send_query_to_database(query, {'id': book_id, 'tz': DEFAULT_TIMEZONE})
         #     book.reserved = False
         #     book.book_lender = None
         #     db.session.commit()
@@ -229,10 +188,11 @@ def receive_book(book_id):
         return_date = current_date + timedelta(days=book_owner.duration)
         query = text("""UPDATE books SET
          return_date = :return_date,
-         lent_out = TRUE
+         lent_out = TRUE,
+         updated_at = timezone(:tz, NOW())
          WHERE id = :id
         """)
-        send_query_to_database(query, {'return_date': return_date, 'id': book_id})
+        send_query_to_database(query, {'return_date': return_date, 'id': book_id, 'tz': DEFAULT_TIMEZONE})
         #         book.return_date = return_date
         #         book.lent_out = True
         #         db.session.commit()
@@ -327,7 +287,6 @@ def add_book():
                                                        'owner_id': current_user.id,
                                                        'description': description})
     # book_data = response[0]
-    print(response[0])
     new_book = Book(title=title,
                     author=author,
                     image_url=image_url,

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 from flask_login import UserMixin
 
-from src.constants import DEFAULT_LEND_DURATION
+from src.constants import DEFAULT_LEND_DURATION, DEFAULT_TIMEZONE
 from src.db.dao import db
 
 
@@ -21,8 +21,11 @@ class Book(db.Model):
     reserved = Column(Boolean, nullable=False, default=False)
     lent_out = Column(Boolean, nullable=False, default=False)
     active = Column(Boolean, nullable=False, default=True)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), default=func.timezone(DEFAULT_TIMEZONE, func.now()), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True),
+                        default=func.timezone(DEFAULT_TIMEZONE, func.now()),
+                        onupdate=func.timezone(DEFAULT_TIMEZONE, func.now()),
+                        nullable=False)
 
     owner_id: Mapped[Integer] = Column(Integer, ForeignKey('users.id'), nullable=False)
     lender_id: Mapped[Integer] = Column(Integer, ForeignKey('users.id'))
@@ -59,8 +62,11 @@ class User(db.Model, UserMixin):
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(250), nullable=False)
     duration = Column(Integer, nullable=False, server_default=str(DEFAULT_LEND_DURATION))
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), default=func.timezone(DEFAULT_TIMEZONE, func.now()), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True),
+                        default=func.timezone(DEFAULT_TIMEZONE, func.now()),
+                        onupdate=func.timezone(DEFAULT_TIMEZONE, func.now()),
+                        nullable=False)
 
     my_books: Mapped[list[Book]] = relationship('Book', foreign_keys="[Book.owner_id]")
     reserved_books: Mapped[list[Book]] = relationship('Book',
