@@ -19,7 +19,10 @@ LOGGER_LOCATION = str(ROOT / "logs" / "book_lending_be.log")
 DEFAULT_LEND_DURATION = 28
 MIN_LEND_DURATION = 7
 MAX_LEND_DURATION = 92
-TIMEZONE = "Europe/Tallinn"
+PASSWORD_MIN_LENGTH = 6
+PASSWORD_MAX_LENGTH = 50
+
+DEFAULT_TIMEZONE = "Europe/Tallinn"
 
 # DATABASE
 DB_TABLES = {'alembic_version', 'books', 'users'}

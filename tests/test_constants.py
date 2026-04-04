@@ -10,6 +10,7 @@ class Prefix:
 
 
 class BookEndpoints:
+    FETCH_ALL = f'{Prefix.BOOK}/add_new_book'
     ADD_BOOK = f'{Prefix.BOOK}/add_new_book'
     BOOK_ACTIVITY = f'{Prefix.BOOK}/activity'
     RESERVE_BOOK = f'{Prefix.BOOK}/reserve_book'
@@ -24,3 +25,19 @@ class UserEndpoints:
     REGISTER = f'{Prefix.USER}/register'
     LOGIN = f'{Prefix.USER}/login'
     LOGOUT = f'{Prefix.USER}/logout'
+
+
+class TestBooks:
+    cashflow = {
+        'title': "Rich Dad's CASHFLOW Quadrant: Rich Dad's Guide to Financial Freedom",
+        'author': 'Robert Kiyosaki',
+        'imageUrl': 'https://m.media-amazon.com/images/I/71+SWQ6xj1L._SY466_.jpg',
+        'description': 'Cashflow description'
+    }
+    rich_dad = {
+        'title': 'Rich Dad Poor Dad',
+        'author': 'Robert Kiyosaki',
+        'imageUrl': 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Rich_Dad_Poor_Dad.jpg/220px'
+                    '-Rich_Dad_Poor_Dad.jpg',
+        'description': 'First book'
+    }

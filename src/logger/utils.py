@@ -1,11 +1,11 @@
 from datetime import datetime
 import logging
 from zoneinfo import ZoneInfo
-from src.constants import TIMEZONE
+from src.constants import DEFAULT_TIMEZONE
 
 
 def format_time(record, datefmt=None):
-    dt = datetime.fromtimestamp(record.created, ZoneInfo(TIMEZONE))
+    dt = datetime.fromtimestamp(record.created, ZoneInfo(DEFAULT_TIMEZONE))
     if datefmt:
         return dt.strftime(datefmt)
     return dt.isoformat()

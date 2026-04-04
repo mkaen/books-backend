@@ -3,8 +3,7 @@ import os
 
 from src.db.dao import init_database
 from src.db.health import check_database
-
-from src.api.controller import user_blueprint, book_blueprint
+from src.auth.routes import user_blueprint, book_blueprint
 from src.utilities.auth import login_manager
 from src.configuration.config import Configuration
 from src.logger.logger_config import configure_logger
@@ -40,7 +39,7 @@ def create_app(test_config=None):
     app.register_blueprint(user_blueprint)
     app.register_blueprint(book_blueprint)
 
-    @app.route('/health')
+    @app.route('/health', methods=['GET'])
     def health():
         """Check database health."""
         with app.app_context():

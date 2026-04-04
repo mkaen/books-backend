@@ -2,10 +2,11 @@ from datetime import date
 
 from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, TIMESTAMP
 from sqlalchemy.orm import Mapped, relationship
-from sqlalchemy.sql import func
+from sqlalchemy import func
 from flask_login import UserMixin
+from datetime import datetime, timezone
 
-from src.constants import DEFAULT_LEND_DURATION
+from src.constants import DEFAULT_LEND_DURATION, DEFAULT_TIMEZONE
 from src.db.dao import db
 
 
@@ -21,8 +22,19 @@ class Book(db.Model):
     reserved = Column(Boolean, nullable=False, default=False)
     lent_out = Column(Boolean, nullable=False, default=False)
     active = Column(Boolean, nullable=False, default=True)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
 
     owner_id: Mapped[Integer] = Column(Integer, ForeignKey('users.id'), nullable=False)
     lender_id: Mapped[Integer] = Column(Integer, ForeignKey('users.id'))
@@ -49,6 +61,9 @@ class Book(db.Model):
             result['overdue'] = True
         return result
 
+    def __str__(self):
+        return f"Book: {self.title} id: {self.id}"
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -59,8 +74,19 @@ class User(db.Model, UserMixin):
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(250), nullable=False)
     duration = Column(Integer, nullable=False, server_default=str(DEFAULT_LEND_DURATION))
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
 
     my_books: Mapped[list[Book]] = relationship('Book', foreign_keys="[Book.owner_id]")
     reserved_books: Mapped[list[Book]] = relationship('Book',
@@ -74,3 +100,6 @@ class User(db.Model, UserMixin):
             "email": self.email,
             "duration": self.duration
         }
+
+    def __str__(self):
+        return f"User: {self.first_name} {self.last_name} with id {self.id}"

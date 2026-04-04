@@ -2,23 +2,7 @@ from src.db.dao import db
 from src.models.models import User, Book
 from conftest import client, first_user_with_books, second_user_with_books
 from auth_helper import login
-from test_constants import TestUserEmail, BookEndpoints
-
-
-# NEW BOOKS CONTENT
-
-cashflow = {
-    'title': "Rich Dad's CASHFLOW Quadrant: Rich Dad's Guide to Financial Freedom",
-    'author': 'Robert Kiyosaki',
-    'imageUrl': 'https://m.media-amazon.com/images/I/71+SWQ6xj1L._SY466_.jpg',
-    'description': 'Cashflow description'
-}
-rich_dad = {
-    'title': 'Rich Dad Poor Dad',
-    'author': 'Robert Kiyosaki',
-    'imageUrl': 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Rich_Dad_Poor_Dad.jpg/220px-Rich_Dad_Poor_Dad.jpg',
-    'description': 'First book'
-}
+from test_constants import TestUserEmail, BookEndpoints, TestBooks
 
 
 def test_users_amount_in_temporary_db(client, first_user_with_books, second_user_with_books):
@@ -32,7 +16,7 @@ def test_books_amount_in_temporary_db(client, first_user_with_books, second_user
 
 
 def test_validate_book_ownership(client, first_user_with_books, second_user_with_books):
-    book_rich_dad = db.session.query(Book).filter(Book.title.ilike(rich_dad.get('title'))).first()
+    book_rich_dad = db.session.query(Book).filter(Book.title.ilike(TestBooks.rich_dad.get('title'))).first()
     assert book_rich_dad.owner_id == 1
     rd_book_owner = db.get_or_404(User, 1)
     assert rd_book_owner.last_name == 'Viik'
@@ -47,18 +31,18 @@ def test_add_book(client, first_user_with_books):
     login(client, TestUserEmail.JUHAN)
     assert Book.query.count() == 2
     db.session.close()
-    response = client.post(BookEndpoints.ADD_BOOK, json=cashflow)  # FEILIB SEE RIDA
+    response = client.post(BookEndpoints.ADD_BOOK, json=TestBooks.cashflow)  # FEILIB SEE RIDA KUNA book.updated_at meetod ei sobi sqlite ja raw sql-ga
     assert response.status_code == 201
     db.session.close()
     assert Book.query.count() == 3
-    book = db.session.query(Book).filter(Book.title.ilike(cashflow.get('title'))).first()
+    book = db.session.query(Book).filter(Book.title.ilike(TestBooks.cashflow.get('title'))).first()
     assert book is not None
-    assert book.author == cashflow.get('author')
+    assert book.author == TestBooks.cashflow.get('author')
 
 
 def test_add_book_user_not_authenticated(client):
     """Test add_book if user not logged in."""
-    response = client.post(BookEndpoints.ADD_BOOK, json=cashflow)
+    response = client.post(BookEndpoints.ADD_BOOK, json=TestBooks.cashflow)
     assert response.status_code == 401
 
 
@@ -66,11 +50,11 @@ def test_add_book_title_already_exists(client, first_user_with_books):
     """Test adding a book that already exists in database after login."""
     login_response = login(client, TestUserEmail.JUHAN)
     print(login_response)
-    result = db.session.query(Book).filter(Book.title.ilike(rich_dad.get('title'))).all()
+    result = db.session.query(Book).filter(Book.title.ilike(TestBooks.rich_dad.get('title'))).all()
     assert len(result) == 1
-    response = client.post('/book_api/add_new_book', json=rich_dad)
+    response = client.post('/book_api/add_new_book', json=TestBooks.rich_dad)
     assert response.status_code == 409
-    result = db.session.query(Book).filter(Book.title.ilike(rich_dad.get('title'))).all()
+    result = db.session.query(Book).filter(Book.title.ilike(TestBooks.rich_dad.get('title'))).all()
     assert len(result) == 1
 
 
