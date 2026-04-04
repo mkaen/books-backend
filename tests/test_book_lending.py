@@ -5,7 +5,7 @@ from flask_login import current_user
 
 from src.db.dao import db
 from src.models.models import User, Book
-from conftest import client, first_user_with_books, second_user_with_books, third_user_with_books
+from conftest import client, first_user_with_books, second_user_with_books, third_user_without_books
 from auth_helper import login, logout
 from test_constants import TestUserEmail, BookEndpoints
 from test_utils import reserve_and_receive_book
@@ -28,7 +28,7 @@ def test_reserve_book_not_found(client, first_user_with_books):
     assert response.status_code == 404
 
 
-def test_reserve_book_already_reserved(client, first_user_with_books, second_user_with_books, third_user_with_books):
+def test_reserve_book_already_reserved(client, first_user_with_books, second_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     response = client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     book = db.get_or_404(Book, 1)
@@ -58,7 +58,7 @@ def test_reserve_book_reserve_own_book(client, first_user_with_books):
 
 
 #  BOOK CANCELLATION
-def test_cancel_reservation_by_owner(client, first_user_with_books, third_user_with_books):
+def test_cancel_reservation_by_owner(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     reservation_response = client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     assert reservation_response.status_code == 200
@@ -77,7 +77,7 @@ def test_cancel_reservation_by_owner(client, first_user_with_books, third_user_w
     assert not updated_book.book_lender
 
 
-def test_cancel_reservation_by_lender(client, first_user_with_books, third_user_with_books):
+def test_cancel_reservation_by_lender(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     reservation_response = client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     assert reservation_response.status_code == 200
@@ -95,7 +95,7 @@ def test_cancel_reservation_by_not_authenticated_user(client, first_user_with_bo
 
 
 def test_cancel_reservation_by_unauthorized_user(client, first_user_with_books, second_user_with_books,
-                                                 third_user_with_books):
+                                                 third_user_without_books):
     login(client, TestUserEmail.PRIIT)
     reservation_response = client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     assert reservation_response.status_code == 200
@@ -121,7 +121,7 @@ def test_cancel_reservation_book_not_found(client, first_user_with_books):
 
 # RECEIVE BOOK
 
-def test_receive_book_by_lender(client, first_user_with_books, third_user_with_books):
+def test_receive_book_by_lender(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     response = client.patch(f'{BookEndpoints.RECEIVE_BOOK}/1')
@@ -131,7 +131,7 @@ def test_receive_book_by_lender(client, first_user_with_books, third_user_with_b
     assert book.return_date
 
 
-def test_receive_book_by_borrower(client, first_user_with_books, third_user_with_books):
+def test_receive_book_by_borrower(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     logout(client)
@@ -145,7 +145,7 @@ def test_receive_book_by_borrower(client, first_user_with_books, third_user_with
     assert book.lender_id == 2
 
 
-def test_receive_book_user_not_authenticated(client, first_user_with_books, third_user_with_books):
+def test_receive_book_user_not_authenticated(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     logout(client)
@@ -153,7 +153,7 @@ def test_receive_book_user_not_authenticated(client, first_user_with_books, thir
     assert response.status_code == 401
 
 
-def test_receive_book_user_unauthorized(client, first_user_with_books, second_user_with_books, third_user_with_books):
+def test_receive_book_user_unauthorized(client, first_user_with_books, second_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     client.patch(f'{BookEndpoints.RESERVE_BOOK}/1')
     logout(client)
@@ -162,20 +162,20 @@ def test_receive_book_user_unauthorized(client, first_user_with_books, second_us
     assert response.status_code == 401
 
 
-def test_receive_book_not_found(client, third_user_with_books):
+def test_receive_book_not_found(client, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     response = client.patch(f'{BookEndpoints.RECEIVE_BOOK}/1')
     assert response.status_code == 404
 
 
-def test_receive_book_already_received(client, third_user_with_books, first_user_with_books):
+def test_receive_book_already_received(client, third_user_without_books, first_user_with_books):
     login(client, TestUserEmail.TOOMAS)
     reserve_and_receive_book(client, 1)
     response = client.patch(f'{BookEndpoints.RECEIVE_BOOK}/1')
     assert response.status_code == 400
 
 
-def test_receive_book_set_return_date(client, third_user_with_books, first_user_with_books):
+def test_receive_book_set_return_date(client, third_user_without_books, first_user_with_books):
     login(client, TestUserEmail.TOOMAS)
     reserve_and_receive_book(client, 1)
     book = db.get_or_404(Book, 1)
@@ -184,7 +184,7 @@ def test_receive_book_set_return_date(client, third_user_with_books, first_user_
 
 #  RETURN BOOK
 
-def test_return_book_by_lender(client, first_user_with_books, third_user_with_books):
+def test_return_book_by_lender(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     reserve_and_receive_book(client, 1)
     book = db.get_or_404(Book, 1)
@@ -203,7 +203,7 @@ def test_return_book_by_lender(client, first_user_with_books, third_user_with_bo
     assert not book.book_lender
 
 
-def test_return_book_by_borrower(client, first_user_with_books, third_user_with_books):
+def test_return_book_by_borrower(client, first_user_with_books, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     reserve_and_receive_book(client, 1)
     logout(client)
@@ -217,7 +217,7 @@ def test_return_book_by_borrower(client, first_user_with_books, third_user_with_
     assert not book.lender_id
 
 
-def test_return_book_not_found(client, third_user_with_books):
+def test_return_book_not_found(client, third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     response = client.patch(f'{BookEndpoints.RETURN_BOOK}/1')
     assert response.status_code == 404
@@ -228,7 +228,8 @@ def test_return_book_user_not_authenticated(client, first_user_with_books):
     assert response.status_code == 401
 
 
-def test_return_book_user_not_authorized(client, first_user_with_books, second_user_with_books, third_user_with_books):
+def test_return_book_user_not_authorized(client, first_user_with_books, second_user_with_books,
+                                         third_user_without_books):
     login(client, TestUserEmail.TOOMAS)
     reserve_and_receive_book(client, 1)
     logout(client)

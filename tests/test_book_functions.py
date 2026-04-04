@@ -17,8 +17,10 @@ def test_deactivate_and_activate_for_lending(client, first_user_with_books):
     assert book.active
     activation_response = client.patch(f'{BookEndpoints.BOOK_ACTIVITY}/{book.id}')
     updated_book = db.get_or_404(Book, 1)
-    assert updated_book.active is False
+    print(f"RAAMAT: {book}")
+    print(updated_book.active)
     assert activation_response.status_code == 200
+    assert not updated_book.active
     activated_books = db.session.execute(db.session.query(Book)
                                          .filter(Book.active)).scalars().all()
     assert len(activated_books) == 1

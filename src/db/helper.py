@@ -1,5 +1,5 @@
 from src.db.dao import db
-from logger.logger_config import logger
+from src.logger.logger_config import logger
 from src.models.models import Book
 
 

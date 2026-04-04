@@ -1,5 +1,8 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, post_load
 from datetime import date
+from flask_login import current_user
+
+from constants import MIN_LEND_DURATION, MAX_LEND_DURATION
 
 
 class BookSchema(Schema):
@@ -24,3 +27,36 @@ class BookSchema(Schema):
         else:
             return_date = obj.return_date
         return True if return_date and return_date < date.today() else False
+
+
+class AddNewBookSchema(Schema):
+    title = fields.Str(data_key='title', required=True, validate=validate.Length(min=2, max=70))
+    author = fields.Str(data_key='author', required=True, validate=validate.Length(min=2, max=30))
+    description = fields.Str(data_key='description', allow_none=True)
+    image_url = fields.URL(data_key='imageUrl', load_only=True)
+
+    @post_load
+    def add_owner_id(self, data, **kwargs):
+        data['owner_id'] = current_user.id
+        return data
+
+
+# USER SCHEMAS
+class UserPublicSchema(Schema):
+    id = fields.Int(data_key='id')
+    first_name = fields.Str(data_key='firstName', required=True)
+    email = fields.Email(data_key='email', required=True, load_only=True)
+    duration = fields.Int(data_key='duration', validate=validate.Range(min=MIN_LEND_DURATION, max=MAX_LEND_DURATION))
+
+
+class UserRegisterSchema(Schema):
+    first_name = fields.Str(data_key='firstName', required=True)
+    last_name = fields.Str(data_key='lastName', required=True)
+    email = fields.Email(data_key='email', required=True, load_only=True)
+    password = fields.Str(data_key='password', required=True, load_only=True)
+
+
+class UserLoginSchema(Schema):
+    email = fields.Email(data_key='email', required=True)
+    password = fields.Str(data_key='password', required=True, load_only=True)
+

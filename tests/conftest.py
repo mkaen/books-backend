@@ -2,10 +2,11 @@ import pytest
 
 from auth_helper import logout
 from main import create_app
-from configuration.config import TestConfig
+from src.configuration.config import TestConfig
 from src.db.dao import db
 from src.models.models import Book, User
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 
 @pytest.fixture
@@ -43,7 +44,8 @@ def first_user_with_books(client, app):
                                 '-Rich_Dad_Poor_Dad.jpg',
                       description='First book',
                       owner_id=new_user.id,
-                      book_owner=new_user)
+                      book_owner=new_user
+                      )
         book_2 = Book(title='Before You Quit Your Job',
                       author='Robert Kiyosaki',
                       image_url='https://m.media-amazon.com/images/I/81e59Ch9oJL._SY466_.jpg',
@@ -83,7 +85,7 @@ def second_user_with_books(client, app):
 
 
 @pytest.fixture
-def third_user_with_books(client, app):
+def third_user_without_books(client, app):
     with app.app_context():
         new_user = User(
             first_name='Toomas',
