@@ -36,7 +36,10 @@ setup(
     extras_require={
         "test": [
             "pytest~=8.3.3",
-        ]
+        ],
+        "prod": [
+            "gunicorn~=23.0.0",
+        ],
     },
     test_suite="tests",
 )
