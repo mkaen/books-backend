@@ -2,7 +2,8 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user, logout_user, login_user
 
-from api.user.utils import compare_passwords, validate_user_registration_data, is_existing_email
+from src.api.user.utils import compare_passwords, validate_user_registration_data, is_existing_email
+from src.db.dao import db
 from src.models.models import User
 from src.logger.logger_config import logger
 from src.api.user.service import handle_duration, get_user_data_by_email, save_data_and_fetch_user_id
@@ -49,7 +50,7 @@ def register():
         return jsonify({"message": msg}), 409
 
     user_id = save_data_and_fetch_user_id(data)
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
 
     login_user(user)
     logger.info(f"Registered new user id: {current_user.id}!")

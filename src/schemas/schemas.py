@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, validate, post_load
 from datetime import date
 from flask_login import current_user
 
-from constants import MIN_LEND_DURATION, MAX_LEND_DURATION
+from src.constants import MIN_LEND_DURATION, MAX_LEND_DURATION
 
 
 class BookSchema(Schema):

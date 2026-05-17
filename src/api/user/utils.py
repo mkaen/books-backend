@@ -2,7 +2,7 @@ from flask import jsonify
 from werkzeug.security import check_password_hash
 from sqlalchemy import text
 
-from db.helper import send_query_to_database
+from src.db.helper import send_query_to_database
 from src.logger.logger_config import logger
 
 
