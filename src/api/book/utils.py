@@ -126,7 +126,7 @@ def handle_receive_book(book_id):
         return jsonify({"message": message}), 400
     if current_user in (book.book_owner, book.book_lender):
         current_date = datetime.now().date()
-        book_owner = User.query.get(book.owner_id)
+        book_owner = book.book_owner
         return_date = current_date + timedelta(days=book_owner.duration)
         # query = text("""UPDATE books SET
         #  return_date = :return_date,

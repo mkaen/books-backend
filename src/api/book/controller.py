@@ -3,7 +3,7 @@ from sqlalchemy import text
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 
-from schemas.schemas import AddNewBookSchema
+from src.schemas.schemas import AddNewBookSchema
 from src.api.book.utils import handle_book_activity, handle_return_book, handle_reserve_book, handle_cancel_reservation, \
     handle_receive_book, handle_remove_book, handle_add_new_book
 from src.db.dao import db

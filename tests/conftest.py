@@ -1,7 +1,7 @@
 import pytest
 
 from auth_helper import logout
-from main import create_app
+from src.main import create_app
 from src.configuration.config import TestConfig
 from src.db.dao import db
 from src.models.models import Book, User
