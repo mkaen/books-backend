@@ -30,7 +30,9 @@ def change_duration(user_id):
 @user_blueprint.route('/current_user', methods=['GET'])
 def get_current_user():
     if current_user.is_authenticated:
-        return jsonify(public_schema.dump(current_user)), 200
+        user = db.session.get(User, current_user.id)
+        logger.info(f"Current user id: {user.id} is authenticated")
+        return jsonify(public_schema.dump(user)), 200
     return jsonify({"authenticated": False}), 401
 
 
